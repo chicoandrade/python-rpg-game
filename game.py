@@ -37,8 +37,14 @@ msg_display = False
 msg_time = time.time()
 msg_duration = 2
 key_pressed = ""
-heart_image = pygame.image.load("images/heart01.png").convert()
-heart_image = pygame.transform.scale(heart_image, (int(block_size), int(block_size)))
+# images
+img_background = pygame.image.load("images/cave01.png").convert_alpha()
+img_background = pygame.transform.scale(img_background, (screen_widht, screen_height - (2 * block_size)))
+img_heart = pygame.image.load("images/heart01.png").convert_alpha()
+img_heart = pygame.transform.scale(img_heart, (int(block_size), int(block_size)))
+img_door = pygame.image.load("images/door01.png").convert_alpha()
+img_door = pygame.transform.scale(img_door, (int(screen_widht/6), int(screen_widht/6)))
+
 
 def show_text(text="Nice try", color=color_blue, position=(int(screen_widht/2), 20)):
     text_font = pygame.font.SysFont("monaco", 72)  # pygame.font.SysFont(name, size)
@@ -49,8 +55,9 @@ def show_text(text="Nice try", color=color_blue, position=(int(screen_widht/2), 
 
 
 def quit_game():
-    screen.fill(color_white)
-    show_text(text="Bye", position=(int(screen_widht/2), int(screen_height/2)))
+    screen.fill(color_black)
+    load_background()
+    show_text(text="Bye", position=(int(screen_widht/2), int(screen_height/2)), color=color_white)
     pygame.display.flip()  # flips the frame to make the text appear
     time.sleep(1)
     pygame.quit()  # pygame exit
@@ -69,22 +76,36 @@ def game_over():
     quit_game()
 
 
-def show_lifes(lifes=5):
+def load_background():
+    screen.blit(img_background, (0, 0))
+
+
+def show_lifes(lifes=5, color=color_black):
     text_font = pygame.font.SysFont("monaco", 24)
-    lifes_surface = text_font.render("Lifes: ", True, color_black)
+    lifes_surface = text_font.render("Lifes: ", True, color)
     lifes_rectangle = lifes_surface.get_rect()
-    lifes_rectangle.midtop = (block_size*2, block_size * 3)
+    lifes_rectangle.midtop = (block_size*2, block_size * 2)
     screen.blit(lifes_surface, lifes_rectangle)  # puts the surface on the play surface
-    screen.blit(heart_image, (block_size * 2, block_size * 4), )
-    screen.blit(heart_image, (block_size * 3, block_size * 4), )
+    count = 1
+    while count < lifes:
+        screen.blit(img_heart, (block_size * (count), block_size * 3))
+        screen.blit(img_heart, (block_size * (count + 1), block_size * 3))
+        count += 1
 
 
-def show_class(class_name="warrior"):
+def show_class(class_name="warrior", color=color_white):
     text_font = pygame.font.SysFont("monaco", 24)
-    score_surface = text_font.render("Class: " + str(class_name), True, color_black)
+    score_surface = text_font.render("Class: " + str(class_name), True, color)
     score_rectangle = score_surface.get_rect()
-    score_rectangle.midtop = (block_size * 2, block_size * 2)
+    score_rectangle.midtop = (block_size * 3.5, block_size)
     screen.blit(score_surface, score_rectangle)  # puts the surface on the play surface
+
+
+def load_doors(quantity=3):
+    count = 1
+    while count <= quantity:
+        screen.blit(img_door, ((count*screen_widht/3 - screen_widht/4), (screen_height - 2 * block_size - img_door.get_height())))
+        count += 1
 
 
 show_text(text="Deploying enemies...", color=color_white)
@@ -112,11 +133,13 @@ while True:
                 if event.key == pygame.K_ESCAPE:
                     pygame.event.post(pygame.event.Event(pygame.QUIT))
 
-        screen.fill(color_white)
+        screen.fill(color_black)
         # Drawings should be bellow this line, otherwise they will not appear
+        load_background()
+        load_doors()
 
-        show_lifes()
-        show_class()
+        show_lifes(color=color_white)
+        show_class(color=color_white)
         pygame.display.flip() # update the frame
         fps_controller.tick(framerate) # controls the framerate
     except Exception as e:
